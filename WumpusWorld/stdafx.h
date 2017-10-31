@@ -9,6 +9,18 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <conio.h>
+#include <Windows.h>
+
+extern HANDLE console;
+extern COORD cursorPosition;
+
+inline void MoveCursor(const int& x, const int& y)
+{
+	cursorPosition.X = x;
+	cursorPosition.Y = y;
+	SetConsoleCursorPosition(console, cursorPosition);
+}
 
 namespace Score
 {
@@ -17,6 +29,3 @@ namespace Score
 	const int Chest = 1000;
 	const int Kill = 500;
 }
-
-
-// TODO: adicionar referências de cabeçalhos adicionais que seu programa necessita

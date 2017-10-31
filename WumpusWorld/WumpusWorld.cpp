@@ -1,16 +1,19 @@
 #include "stdafx.h"
-//#include "GameLevel.h"
+#include "GameLevel.h"
 
 #include <iostream>
+#include "NormalLevel.h"
 using namespace std;
 int main()
 {
-	cout << "\e[31m&\e[0m" << endl;
+	GameLevel::LoadGameLevel(new NormalLevel("C:\\Users\\jairluiz\\Source\\Repos\\WumpusWorld\\map.txt"));
+
 	//while (true)
 	//{
-	//	GameLevel::activeGameLevel->Update();
-	//	GameLevel::activeGameLevel->Render();
+		//GameLevel::activeGameLevel->Update();
+		GameLevel::activeGameLevel->Render();
 	//}
+
 	_gettch();
     return 0;
 }

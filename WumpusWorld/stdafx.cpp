@@ -6,3 +6,5 @@
 
 // TODO: referencie qualquer cabeçalho adicional necessário em STDAFX.H
 // e não neste arquivo
+HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+COORD cursorPosition;

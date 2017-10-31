@@ -12,8 +12,9 @@ class Explorer : public GameObject
 	int score;
 
 public:
-	Explorer();
-	~Explorer();
+	Explorer() : Explorer(0, 0, Direction::East) { }
+	Explorer(const int x, const int y, const Direction::Flags flags)
+	: x(x), y(y), arrow(1), direction(flags), score(0) { }
 
 	void Update() override;
 	void Render() override;

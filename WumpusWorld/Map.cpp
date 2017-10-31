@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "Map.h"
-
 enum Map::Type : unsigned char;
 
 Map::Map() : width(0), height(0), map(nullptr)
@@ -20,9 +19,14 @@ Map::~Map()
 	delete[] map;
 }
 
-void Map::Load(string name)
+void Map::Initialize()
 {
+	map = new Land*[height];
 
+	for (auto i = 0; i < height; i++)
+	{
+		map[i] = new Land[width];
+	}
 }
 
 void Map::Generate()

@@ -1,16 +1,6 @@
 #include "stdafx.h"
 #include "Explorer.h"
 
-Explorer::Explorer()
-{
-
-}
-
-Explorer::~Explorer()
-{
-
-}
-
 void Explorer::Update()
 {
 	// anda e toma decisões
@@ -20,4 +10,6 @@ void Explorer::Update()
 void Explorer::Render()
 {
 	// desenha o filha da puta
+	MoveCursor(x, y);
+	putchar(direction);
 }

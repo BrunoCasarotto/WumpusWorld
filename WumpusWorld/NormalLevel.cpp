@@ -1,13 +1,76 @@
 #include "stdafx.h"
 #include "NormalLevel.h"
+#include <fstream>
 
 NormalLevel::~NormalLevel()
 {
 	if (map) delete map;
 
-	if (wumpuses.size()) for each (auto wumpus in wumpuses) delete wumpus;
+	DeleteWumpuses();
 
-	if (explorers.size()) for each (auto explorer in explorers) delete explorer;
+	DeleteExplorers();
+}
+
+void NormalLevel::Load()
+{
+	ifstream stream(filename);
+	string buff;
+
+	map = new Map();
+
+	getline(stream, buff);
+	map->Width() = stoi(buff.c_str());
+	getline(stream, buff);
+	map->Height() = stoi(buff);
+
+	map->Initialize();
+
+	DeleteWumpuses();
+	DeleteExplorers();
+	wumpuses.clear();
+	explorers.clear();
+
+	for (auto i = 0; i < map->Height(); i++)
+	{
+		getline(stream, buff);
+		for (auto x = 0; x < map->Width(); x++)
+		{
+			auto l = &map->GetLand(x, i);
+
+			switch (buff[x])
+			{
+			case '-':
+				break;
+			case 'm':
+				wumpuses.push_back(new Wumpus(x, i));
+				ToggleFlag(x, i, Land::Stench);
+				break;
+			case 'c':
+				l->type = Map::Chest;
+				ToggleFlag(x, i, Land::Glow);
+				break;
+			case 'h':
+				l->type = Map::Hole;
+				ToggleFlag(x, i, Land::Breeze);
+				break;
+			case 'w':
+				l->type = Map::Wall;
+				break;
+			case '1':
+				explorers.push_back(new Explorer(x, i, Direction::North));
+				break;
+			case '2':
+				explorers.push_back(new Explorer(x, i, Direction::South));
+				break;
+			case '4':
+				explorers.push_back(new Explorer(x, i, Direction::West));
+				break;
+			case '8':
+				explorers.push_back(new Explorer(x, i, Direction::East));
+				break;
+			}
+		}
+	}
 }
 
 bool NormalLevel::ApplyExplorerPosition(Explorer* explorer) const
@@ -34,28 +97,28 @@ bool NormalLevel::ApplyExplorerPosition(Explorer* explorer) const
 	return true;
 }
 
-void NormalLevel::ToggleWumpusFlag(Wumpus* wumpus)
+void NormalLevel::ToggleFlag(int x, int y, Land::Flags flag) const
 {
-	auto land = map->GetLand(wumpus->X() - 1, wumpus->Y());	// esquerda
-	land.flags = static_cast<Land::Flags>(land.flags ^ Land::Stench);
+	auto land = map->GetLand(x - 1, y);	// esquerda
+	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
 
-	land = map->GetLand(wumpus->X() + 1, wumpus->Y());		// direita
-	land.flags = static_cast<Land::Flags>(land.flags ^ Land::Stench);
+	land = map->GetLand(x + 1, y);		// direita
+	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
 
-	land = map->GetLand(wumpus->X(), wumpus->Y() - 1);		// cima
-	land.flags = static_cast<Land::Flags>(land.flags ^ Land::Stench);
+	land = map->GetLand(x, y - 1);		// cima
+	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
 
-	land = map->GetLand(wumpus->X(), wumpus->Y() + 1);		// baixo
-	land.flags = static_cast<Land::Flags>(land.flags ^ Land::Stench);
+	land = map->GetLand(x, y + 1);		// baixo
+	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
 }
 
 void NormalLevel::Update()
 {
 	for each (auto wumpus in wumpuses)
 	{
-		ToggleWumpusFlag(wumpus);
+		ToggleFlag(wumpus->X(), wumpus->Y(), Land::Stench);
 		wumpus->Update();
-		ToggleWumpusFlag(wumpus);
+		ToggleFlag(wumpus->X(), wumpus->Y(), Land::Stench);
 	}
 
 	for each (auto explorer in explorers)
@@ -70,5 +133,17 @@ void NormalLevel::Update()
 
 void NormalLevel::Render()
 {
+	MoveCursor(0, 0);
+	for (auto y = 0; y < map->Height(); y++)
+	{
+		for (auto x = 0; x < map->Width(); x++)
+		{
+			putchar(map->GetLand(x, y).type);
+		}
+		putchar('\n');
+	}
 
+	for (auto explorer : explorers) explorer->Render();
+
+	for (auto wumpus : wumpuses) wumpus->Render();
 }

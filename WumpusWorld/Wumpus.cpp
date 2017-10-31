@@ -9,4 +9,6 @@ void Wumpus::Update()
 void Wumpus::Render()
 {
 	// desenha
+	MoveCursor(x, y);
+	putchar('m');
 }

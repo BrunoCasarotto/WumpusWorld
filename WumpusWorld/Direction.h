@@ -2,11 +2,11 @@
 
 namespace Direction
 {
-	enum Flags : char
+	enum Flags : unsigned char
 	{
-		North = 0x1,
-		South = 0x2,
-		West = 0x4,
-		East = 0x8
+		North = 193,
+		South = 194,
+		West = 180,
+		East = 195
 	};
 }

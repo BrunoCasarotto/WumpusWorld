@@ -15,8 +15,12 @@ class Map
 public:
 	Map();
 	~Map();
-	void Load(string filename);
+
+	void Initialize();
 	void Generate();
+
+	int& Width() { return width; }
+	int& Height() { return height; }
 
 	Land& GetLand(int x, int y);
 
@@ -41,4 +45,10 @@ public:
 
 	Map::Type type;
 	Flags flags;
+
+	Land(): Land(Map::Ground)
+	{
+	}
+
+	Land(Map::Type type) : type(type), flags(static_cast<Flags>(0)) {}
 };
