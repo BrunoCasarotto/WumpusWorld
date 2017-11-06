@@ -16,12 +16,13 @@ class NormalLevel : public GameLevel
 	bool ApplyExplorerPosition(Explorer* explorer) const;
 	void ToggleFlag(int x, int y, Land::Flags flag) const;
 
-	void DeleteWumpuses() { if (wumpuses.size()) for each (auto wumpus in wumpuses) delete wumpus; }
-	void DeleteExplorers() { if (explorers.size()) for each (auto explorer in explorers) delete explorer; }
+	void DeleteWumpuses() const { if (wumpuses.size()) for each (auto wumpus in wumpuses) delete wumpus; }
+	void DeleteExplorers() const { if (explorers.size()) for each (auto explorer in explorers) delete explorer; }
 
 public:
-	NormalLevel(string filename) : filename(filename) {}
-	~NormalLevel();
+	NormalLevel(string filename) : map(), filename(filename) {}
+
+	virtual ~NormalLevel();
 
 	void Load() override;
 	void Update() override;

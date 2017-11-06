@@ -157,6 +157,7 @@
     <ClInclude Include="Wumpus.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Direction.cpp" />
     <ClCompile Include="Explorer.cpp" />
     <ClCompile Include="GameLevel.cpp" />
     <ClCompile Include="Map.cpp" />

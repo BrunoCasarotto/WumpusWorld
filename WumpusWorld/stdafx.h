@@ -15,6 +15,12 @@
 extern HANDLE console;
 extern COORD cursorPosition;
 
+struct Position
+{
+	int x;
+	int y;
+};
+
 inline void MoveCursor(const int& x, const int& y)
 {
 	cursorPosition.X = x;

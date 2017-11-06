@@ -57,16 +57,16 @@ void NormalLevel::Load()
 				l->type = Map::Wall;
 				break;
 			case '1':
-				explorers.push_back(new Explorer(x, i, Direction::North));
+				explorers.push_back(new Explorer(x, i, Direction::North, map));
 				break;
 			case '2':
-				explorers.push_back(new Explorer(x, i, Direction::South));
+				explorers.push_back(new Explorer(x, i, Direction::South, map));
 				break;
 			case '4':
-				explorers.push_back(new Explorer(x, i, Direction::West));
+				explorers.push_back(new Explorer(x, i, Direction::West, map));
 				break;
 			case '8':
-				explorers.push_back(new Explorer(x, i, Direction::East));
+				explorers.push_back(new Explorer(x, i, Direction::East, map));
 				break;
 			}
 		}
