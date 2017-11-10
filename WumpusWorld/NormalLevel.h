@@ -24,8 +24,13 @@ public:
 
 	virtual ~NormalLevel();
 
+	void PickupChest(int x, int y) const;
+	void ExplorerDied(Explorer* exp) const;
+	void PrintEnd() const;
+
 	void Load() override;
 	void Update() override;
 	void Render() override;
+	bool Running() override;
 };
 

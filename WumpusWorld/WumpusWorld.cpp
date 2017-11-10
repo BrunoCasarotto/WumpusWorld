@@ -3,16 +3,23 @@
 
 #include <iostream>
 #include "NormalLevel.h"
+#include <ctime>
 using namespace std;
 int main()
 {
-	GameLevel::LoadGameLevel(new NormalLevel("C:\\Users\\jairluiz\\Source\\Repos\\WumpusWorld\\map.txt"));
+	srand(time(nullptr));
 
-	//while (true)
-	//{
-		//GameLevel::activeGameLevel->Update();
+	GameLevel::LoadGameLevel(new NormalLevel("C:\\Users\\jairluiz\\Source\\Repos\\WumpusWorld\\map.txt"));
+	GameLevel::activeGameLevel->Render();
+
+	while (GameLevel::activeGameLevel->Running())
+	{
+		GameLevel::activeGameLevel->Update();
 		GameLevel::activeGameLevel->Render();
-	//}
+		Sleep(100);
+	}
+
+	static_cast<NormalLevel*>(GameLevel::activeGameLevel)->PrintEnd();
 
 	_gettch();
     return 0;

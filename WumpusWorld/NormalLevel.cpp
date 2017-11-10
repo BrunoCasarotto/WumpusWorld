@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "NormalLevel.h"
 #include <fstream>
+#include <algorithm>
 
 NormalLevel::~NormalLevel()
 {
@@ -42,7 +43,7 @@ void NormalLevel::Load()
 			case '-':
 				break;
 			case 'm':
-				wumpuses.push_back(new Wumpus(x, i));
+				wumpuses.push_back(new Wumpus(x, i, map));
 				ToggleFlag(x, i, Land::Stench);
 				break;
 			case 'c':
@@ -77,21 +78,19 @@ bool NormalLevel::ApplyExplorerPosition(Explorer* explorer) const
 {
 	auto land = map->GetLand(explorer->X(), explorer->Y());
 
-	if (land.type & Map::Hole) // caiu no buraco
+	if (land.type == Map::Hole) // caiu no buraco
 	{
 		explorer->ApplyScore(Score::Hole);
 		return false;
 	}
 
-	if (land.type & Map::Chest)
+	if (SamePosition(explorer->Position(), { 0, 0 }))
 	{
-		explorer->ApplyScore(Score::Chest);
-		return true;
-	}
-
-	if (land.type & Map::Wall)
-	{
-		// resolve depois
+		if (explorer->IsCarryingChest())
+		{
+			explorer->ApplyScore(Score::Chest);
+		}
+		return false;
 	}
 
 	return true;
@@ -99,17 +98,17 @@ bool NormalLevel::ApplyExplorerPosition(Explorer* explorer) const
 
 void NormalLevel::ToggleFlag(int x, int y, Land::Flags flag) const
 {
-	auto land = map->GetLand(x - 1, y);	// esquerda
-	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
+	auto land = &map->GetLand(x - 1, y);	// esquerda
+	land->flags = static_cast<Land::Flags>(land->flags ^ flag);
 
-	land = map->GetLand(x + 1, y);		// direita
-	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
+	land = &map->GetLand(x + 1, y);		// direita
+	land->flags = static_cast<Land::Flags>(land->flags ^ flag);
 
-	land = map->GetLand(x, y - 1);		// cima
-	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
+	land = &map->GetLand(x, y - 1);		// cima
+	land->flags = static_cast<Land::Flags>(land->flags ^ flag);
 
-	land = map->GetLand(x, y + 1);		// baixo
-	land.flags = static_cast<Land::Flags>(land.flags ^ flag);
+	land = &map->GetLand(x, y + 1);		// baixo
+	land->flags = static_cast<Land::Flags>(land->flags ^ flag);
 }
 
 void NormalLevel::Update()
@@ -121,14 +120,54 @@ void NormalLevel::Update()
 		ToggleFlag(wumpus->X(), wumpus->Y(), Land::Stench);
 	}
 
+	vector<Explorer*> dead;
+
 	for each (auto explorer in explorers)
 	{
-		explorer->Update(); // muda de lugar
+		explorer->Update();
 
-		// testar colisão com algum wumpus
+		if (explorer->IsAttacking())
+		{
+			auto ahead = GetAhead(explorer->Position(), explorer->Direction());
 
-		ApplyExplorerPosition(explorer);
+			ahead.x += explorer->Position().x;
+			ahead.y += explorer->Position().y;
+
+			wumpuses.erase(remove_if(wumpuses.begin(), wumpuses.end(), [&ahead, &explorer, this](Wumpus* w)
+			{
+				if (SamePosition(ahead, w->Position()))
+				{
+					ToggleFlag(w->X(), w->Y(), Land::Stench);
+					return true;
+				}
+
+				return false;
+			}), wumpuses.end());
+		}
+
+		for (auto wumpus : wumpuses)
+		{
+			if (SamePosition(explorer->Position(), wumpus->Position()))
+			{
+				explorer->ApplyScore(Score::Wumpus);
+				ExplorerDied(explorer);
+				dead.push_back(explorer);
+				break;
+			}
+		}
+
+		if (!ApplyExplorerPosition(explorer))
+		{
+			ExplorerDied(explorer);
+			dead.push_back(explorer);
+			continue;
+		}
 	}
+
+	explorers.erase(std::remove_if(explorers.begin(), explorers.end(), [&dead](Explorer* e)
+	{
+		return find(dead.begin(), dead.end(), e) != dead.end();
+	}), explorers.end());
 }
 
 void NormalLevel::Render()
@@ -146,4 +185,30 @@ void NormalLevel::Render()
 	for (auto explorer : explorers) explorer->Render();
 
 	for (auto wumpus : wumpuses) wumpus->Render();
+}
+
+bool NormalLevel::Running()
+{
+	return explorers.size() > 0;
+}
+
+void NormalLevel::PickupChest(int x, int y) const
+{
+	ToggleFlag(x, y, Land::Glow);
+	map->PickupChest(x, y);
+}
+
+void NormalLevel::ExplorerDied(Explorer* exp) const
+{
+	if (exp->IsCarryingChest() && map->GetLand(exp->X(), exp->Y()).type != Map::Hole)
+	{
+		ToggleFlag(exp->X(), exp->Y(), Land::Glow);
+		map->PlaceChest(exp->X(), exp->Y());
+	}
+}
+
+void NormalLevel::PrintEnd() const
+{
+	MoveCursor(0, map->Height() + 1);
+	puts("O jogo acabou");
 }

@@ -1,32 +1,81 @@
 #include "stdafx.h"
 #include "Explorer.h"
+#include "NormalLevel.h"
 
 void Explorer::Update()
 {
+	// anda e toma decisões
+	--score;
+
 	auto land = map->GetLand(pos.x, pos.y);
+	auto aheadPos = Direction::GetAhead(pos, direction);;
+	auto ahead = map->GetLand(pos.x + aheadPos.x, pos.y + aheadPos.y);
 
-	if (land.flags & Land::Glow)
+	if (!isCarryingChest && land.type == Map::Chest)
 	{
-		auto ahead = GetAhead(pos, direction);
+		static_cast<NormalLevel*>(GameLevel::activeGameLevel)->PickupChest(pos.x, pos.y);
+		isCarryingChest = true;
+	}
 
-		if (map->GetLand(ahead.x, ahead.y).type & Map::Chest) // anda para a frente
+	if (ahead.type == Map::Wall)
+	{
+		if (rand() % 2)
 		{
-			last = pos;
-			pos = ahead;
+			direction = TurnRight(direction);
 		}
 		else
 		{
-			TurnRight(direction);
+			direction = TurnLeft(direction);
+		}
+
+		return;
+	}
+
+	if (land.flags & Land::Stench && arrow > 0)
+	{
+		//if (rand() % 2)
+		{
+			isAttacking = true;
+			arrow--;
+			return;
 		}
 	}
 
-	// anda e toma decisões
-	--score;
+	if (land.flags & Land::Glow)
+	{
+		if (ahead.type == Map::Chest)
+		{
+			MoveForward(aheadPos);
+		}
+		else
+		{
+			direction = TurnRight(direction);
+		}
+		return;
+	}
+
+	if (land.flags & Land::Breeze)
+	{
+		switch (rand() % 7)
+		{
+		case 0:
+		case 1:
+			direction = TurnLeft(direction);
+			return;
+		case 2:
+		case 3:
+			direction = TurnRight(direction);
+			return;
+
+			// case 4 5 6 ele anda para a frente
+		}
+	}
+
+	MoveForward(aheadPos);
 }
 
 void Explorer::Render()
 {
-	// desenha o filha da puta
 	MoveCursor(pos.x, pos.y);
 	putchar(direction);
 }

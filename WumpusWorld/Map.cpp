@@ -34,12 +34,22 @@ void Map::Generate()
 
 }
 
-Land& Map::GetLand(int x, int y)
+Land& Map::GetLand(int x, int y) const
 {
-	static Land garbage;
+	static Land garbage(Wall);
 
 	if (x >= width || x < 0 || y >= height || y < 0)
 		return garbage;
 
 	return map[y][x];
+}
+
+void Map::PlaceChest(int x, int y) const
+{
+	map[y][x].type = Chest;
+}
+
+void Map::PickupChest(int x, int y) const
+{
+	map[y][x].type = Ground;
 }

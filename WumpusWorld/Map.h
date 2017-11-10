@@ -22,7 +22,9 @@ public:
 	int& Width() { return width; }
 	int& Height() { return height; }
 
-	Land& GetLand(int x, int y);
+	Land& GetLand(int x, int y) const;
+	void PickupChest(int x, int y) const;
+	void PlaceChest(int x, int y) const;
 
 	enum Type : unsigned char
 	{

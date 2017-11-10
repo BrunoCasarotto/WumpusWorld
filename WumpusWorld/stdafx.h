@@ -21,6 +21,8 @@ struct Position
 	int y;
 };
 
+extern bool SamePosition(const struct Position& p1, const struct Position& p2);
+
 inline void MoveCursor(const int& x, const int& y)
 {
 	cursorPosition.X = x;
